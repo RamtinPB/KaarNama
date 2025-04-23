@@ -70,8 +70,8 @@ export default function CalendarBelt() {
 							className={className}
 						>
 							<div className="text-sm">{day.add(1, "day").format("dddd")}</div>
-							<div className="text-lg font-bold">{day.format("D")}</div>
-							<div className="text-xs">{day.format("MMMM")}</div>
+							<div className="text-3xl font-bold">{day.format("D")}</div>
+							<div className="text-sm">{day.format("MMMM")}</div>
 							<div className="text-xs">{day.format("YYYY")}</div>
 						</button>
 					);
