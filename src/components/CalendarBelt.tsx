@@ -1,7 +1,7 @@
 import dayjs from "../utils/dayjs-jalali";
 import { useState, useRef, useEffect } from "react";
 
-const DAYS_COUNT = 45; // e.g., show two weeks
+const DAYS_COUNT = 90;
 
 export default function CalendarBelt() {
 	const centerIndex = Math.floor(DAYS_COUNT / 2); // center is today
@@ -38,7 +38,7 @@ export default function CalendarBelt() {
 
 	//console.log(selectedDay.format("YYYY-MM-DD"));
 
-	console.log(today.format("YYYY-MM-DD"));
+	console.log(selectedDay.format("YYYY-MM-DD"));
 
 	return (
 		<>
@@ -46,10 +46,14 @@ export default function CalendarBelt() {
 				{days.map((day, i) => {
 					const isToday = day.isSame(today, "day");
 					const isSelected = day.isSame(selectedDay, "day");
+					const isBeforeToday = day.isBefore(today, "day");
+
 					const baseClasses =
-						"inline-block mx-2 p-2 w-24 rounded-lg text-center shadow-sm hover:bg-blue-100";
+						"inline-block mx-2 p-2  rounded-lg text-center shadow-sm hover:bg-blue-100";
 					const isSelectedClass = isSelected
 						? "bg-blue-500 text-white"
+						: isBeforeToday
+						? "bg-gray-200 text-gray-500"
 						: "bg-white";
 					const borderClass = isToday ? "!border-2 !border-blue-700" : "";
 
@@ -68,6 +72,7 @@ export default function CalendarBelt() {
 							<div className="text-sm">{day.add(1, "day").format("dddd")}</div>
 							<div className="text-lg font-bold">{day.format("D")}</div>
 							<div className="text-xs">{day.format("MMMM")}</div>
+							<div className="text-xs">{day.format("YYYY")}</div>
 						</button>
 					);
 				})}
