@@ -1,10 +1,14 @@
-import { Button } from "@material-tailwind/react";
+import { Button, Input } from "@material-tailwind/react";
 import dayjs from "../utils/dayjs-jalali";
 import { useState, useRef, useEffect } from "react";
 
 const DAYS_COUNT = 90;
 
-export default function CalendarBelt() {
+interface CalendarBeltProps {
+	onSelectDays: (days: dayjs.Dayjs[]) => void;
+}
+
+export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 	const centerIndex = Math.floor(DAYS_COUNT / 2); // center is today
 
 	const today = dayjs()
@@ -34,12 +38,12 @@ export default function CalendarBelt() {
 		}
 	}, []);
 
-	const [selectedDay, setSelectedDay] = useState(() => [days[centerIndex]]); // default to today
+	const [selectedDays, setSelectedDays] = useState(() => [days[centerIndex]]); // default to today
 
 	const [rangeFrom, setRangeFrom] = useState("");
 	const [rangeTo, setRangeTo] = useState("");
 
-	console.log(selectedDay[0].format("YYYY-MM-DD"));
+	//console.log(selectedDay[0].format("YYYY-MM-DD"));
 
 	//------------------------------------------ Functions ------------------------------------------------------
 
@@ -105,39 +109,47 @@ export default function CalendarBelt() {
 			current = current.add(1, "day");
 		}
 
-		setSelectedDay(range); // set as array
-		console.log(range.map((d) => d.format("YYYY-MM-DD")));
+		setSelectedDays(range); // set as array
+		onSelectDays(range);
+		//console.log(range.map((d) => d.format("YYYY-MM-DD")));
 	};
 
 	const handleDateChange = (
 		e: React.ChangeEvent<HTMLInputElement>,
 		setter: React.Dispatch<React.SetStateAction<string>>
 	) => {
-		let value = e.target.value.replace(/\D/g, ""); // Remove non-digit characters
-		value = value.slice(0, 8); // Limit to the first 8 digits (YYYYMMDD)
+		let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+		value = value.slice(0, 8); // Limit to 8 digits (YYYYMMDD)
 
-		// Format the value as YYYY-MM-DD
-		const formatted = value
-			.slice(0, 4) // Year (YYYY)
-			.concat(value.slice(4, 6).length === 2 ? "-" : "") // Add hyphen after year
-			.concat(value.slice(4, 6)) // Month (MM)
-			.concat(value.slice(6, 8).length === 2 ? "-" : "") // Add hyphen after month
-			.concat(value.slice(6, 8)); // Day (DD)
+		let formatted = "";
+		if (value.length >= 4) {
+			formatted += value.slice(0, 4);
+			if (value.length > 4) {
+				formatted += "-" + value.slice(4, 6);
+				if (value.length > 6) {
+					formatted += "-" + value.slice(6, 8);
+				}
+			}
+		} else {
+			formatted = value;
+		}
 
-		setter(formatted.slice(0, 10)); // Limit to YYYY-MM-DD
+		setter(formatted);
 	};
 
 	return (
 		<>
-			<div className="overflow-x-auto whitespace-nowrap max-w-screen p-4 bg-gray-100">
+			<div className="overflow-x-auto  whitespace-nowrap max-w-screen p-4 ">
 				{days.map((day, i) => {
 					const isToday = day.isSame(today, "day");
-					const isSelected = selectedDay.some((d) => day.isSame(d, "day"));
+					const isSelected = selectedDays.some(
+						(d) => d.format("YYYY-MM-DD") === day.format("YYYY-MM-DD")
+					);
 
 					const isBeforeToday = day.isBefore(today, "day");
 
 					const baseClasses =
-						"inline-block mx-2 p-2  rounded-lg text-center text-black shadow-sm hover:bg-blue-100";
+						"inline-block mx-2 p-2 min-w-20 rounded-lg text-center text-black shadow-sm hover:bg-blue-100";
 					const isSelectedClass = isSelected
 						? "bg-blue-500 text-white"
 						: isBeforeToday
@@ -152,7 +164,9 @@ export default function CalendarBelt() {
 						<Button
 							key={i}
 							ref={isToday ? todayRef : null}
-							onClick={() => setSelectedDay([day])}
+							onClick={() => {
+								setSelectedDays([day]), onSelectDays([day]);
+							}}
 							className={className}
 						>
 							<div className="text-sm">{day.add(1, "day").format("dddd")}</div>
@@ -164,15 +178,18 @@ export default function CalendarBelt() {
 				})}
 			</div>
 			<div className="p-4 flex gap-2 items-center">
-				<input
+				<span>از</span>
+				{/* @ts-ignore */}
+				<Input
 					type="text"
 					placeholder="YYYY-MM-DD"
 					value={rangeFrom}
 					onChange={(e) => handleDateChange(e, setRangeFrom)}
 					className="border p-2 rounded"
 				/>
-				<span>to</span>
-				<input
+				<span>تا</span>
+				{/* @ts-ignore */}
+				<Input
 					type="text"
 					placeholder="YYYY-MM-DD"
 					value={rangeTo}
@@ -184,7 +201,7 @@ export default function CalendarBelt() {
 					onClick={handleApply}
 					className="bg-blue-500 text-white px-4 py-2 rounded"
 				>
-					Apply
+					اعمال
 				</Button>
 			</div>
 		</>
