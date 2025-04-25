@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./App.css";
 import CalendarBelt from "./components/CalendarBelt";
 import dayjs from "./utils/dayjs-jalali";
+import IntelCards from "./components/IntelCards";
 
 function App() {
 	const [selectedDays, setSelectedDays] = useState<dayjs.Dayjs[]>([]);
@@ -10,15 +11,16 @@ function App() {
 
 	return (
 		<>
-			<div className="flex flex-col" style={{ direction: "rtl" }}>
+			<div className="flex flex-col gap-7 pb-10" style={{ direction: "rtl" }}>
 				<div
 					id="calendar_belt"
-					className=" flex flex-col items-center justify-center bg-gray-100"
+					className=" flex flex-col items-center justify-center "
 				>
 					<CalendarBelt onSelectDays={setSelectedDays} />
 				</div>
-				<div id="from-to-input"></div>
-				<div id="cards"></div>
+				<div id="cards" className=" flex flex-col items center justify-center">
+					<IntelCards selectedDays={selectedDays} />
+				</div>
 			</div>
 		</>
 	);

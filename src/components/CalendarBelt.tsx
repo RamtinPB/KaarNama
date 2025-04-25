@@ -139,7 +139,7 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 
 	return (
 		<>
-			<div className="overflow-x-auto  whitespace-nowrap max-w-screen p-4 ">
+			<div className="overflow-x-auto py-10 whitespace-nowrap max-w-screen p-4 bg-gray-100">
 				{days.map((day, i) => {
 					const isToday = day.isSame(today, "day");
 					const isSelected = selectedDays.some(
@@ -151,11 +151,13 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 					const baseClasses =
 						"inline-block mx-2 p-2 min-w-20 rounded-lg text-center text-black shadow-sm hover:bg-blue-100";
 					const isSelectedClass = isSelected
-						? "bg-blue-500 text-white"
+						? isBeforeToday
+							? "bg-blue-300 text-white" // lighter blue for past selected
+							: "bg-blue-500 text-white" // default blue for present/future selected
 						: isBeforeToday
 						? "bg-gray-200 text-gray-500"
 						: "bg-white";
-					const borderClass = isToday ? "!border-2 !border-blue-700" : "";
+					const borderClass = isToday ? "!border-3 !border-blue-700" : "";
 
 					const className = `${baseClasses} ${isSelectedClass} ${borderClass}`;
 
@@ -177,8 +179,8 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 					);
 				})}
 			</div>
-			<div className="p-4 flex gap-2 items-center">
-				<span>از</span>
+			<div className="p-4 my-4 w-screen flex flex-row gap-4 items-center justify-center">
+				<span>از تاریخ </span>
 				{/* @ts-ignore */}
 				<Input
 					type="text"
