@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import dayjs from "../utils/dayjs-jalali";
 import { Button, Card, CardBody, CardHeader } from "@material-tailwind/react";
+import { getJalaliDays } from "../utils/JalaliDays";
+
+const allDays = getJalaliDays();
 
 interface IntelCardsProps {
 	selectedDays: dayjs.Dayjs[];
@@ -63,33 +66,47 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 
 	return (
 		<>
-			<div className="flex flex-col items-center justify-center gap-5 ">
+			<div className="grid grid-cols-2  items-center justify-center gap-5 px-20">
 				{filteredData.length === 0 ? (
 					<p className="text-gray-500">
 						هیچ داده‌ای برای تاریخ‌های انتخاب‌شده وجود ندارد.
 					</p>
 				) : (
 					<>
-						<div className="col-span-full mt-4 p-4 bg-green-100 border border-green-300 rounded-lg text-center font-semibold text-green-800">
+						<div className="col-span-full p-4 pt-3 bg-green-100 border border-green-300 rounded-lg text-center font-semibold text-green-800">
 							مجموع مواد اولیه: {totalResourceCount} تن
 						</div>
 						{filteredData.map((item, idx) => {
-							const day = dayjs(item.date).calendar("jalali").locale("fa");
+							// Step 1: check if this item matches a selected day
+							const matchedSelected = selectedDays.find(
+								(d) => d.format("YYYY-MM-DD") === item.date
+							);
+
+							// Step 2: find the equivalent object from the original `days` array
+							const day =
+								allDays.find(
+									(d) =>
+										d.format("YYYY-MM-DD") ===
+										matchedSelected?.format("YYYY-MM-DD")
+								) ?? null;
+
+							//console.log(day);
+
 							return (
 								// @ts-ignore
 								<Card
 									key={idx}
-									className="bg-white shadow p-4 rounded-xl border container"
+									className="bg-gray-200 shadow-lg p-4 rounded-xl h-full container"
 								>
 									{/* @ts-ignore */}
-									<CardHeader className="pb-2">
+									<CardHeader className="pb-2 bg-inherit  shadow-none">
 										<h3 className="text-lg font-semibold mb-2">
-											تاریخ: {item.date} | کارگاه: {item.workshop}
+											کارگاه: {item.workshop}
 										</h3>
 									</CardHeader>
 									{/* @ts-ignore */}
 									<CardBody className="flex flex-row justify-between">
-										<ul className="list-disc pr-5 text-sm">
+										<ul className="list-disc pr-5 text-md">
 											{item.resources.map((res, i) => {
 												const [key, value] = Object.entries(res)[0];
 												return (
@@ -103,18 +120,19 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 										{/* @ts-ignore */}
 										<Button
 											key={idx}
+											disabled
 											className={
-												"inline-block mx-2 p-2 min-w-20 rounded-lg text-center !border-2 !border-gray-400 text-black shadow-sm hover:bg-blue-100"
+												"inline-block mx-2 p-2 w-24 max-h-fit bg-white  rounded-lg text-center !border-0 text-black shadow-md !cursor-default"
 											}
 										>
 											<div className="text-sm">
-												{day.add(1, "day").format("dddd")}
+												{day?.add(1, "day").format("dddd")}
 											</div>
 											<div className="text-3xl font-bold">
-												{day.format("D")}
+												{day?.format("D")}
 											</div>
-											<div className="text-sm">{day.format("MMMM")}</div>
-											<div className="text-xs">{day.format("YYYY")}</div>
+											<div className="text-sm">{day?.format("MMMM")}</div>
+											<div className="text-xs">{day?.format("YYYY")}</div>
 										</Button>
 									</CardBody>
 								</Card>
