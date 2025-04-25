@@ -17,13 +17,19 @@ interface ResourceItem {
 interface IntelDataItem {
 	date: string;
 	workshop: string;
+	manager: string;
+	phone: string;
 	resources: ResourceItem[];
 }
 
 export default function IntelCards({ selectedDays }: IntelCardsProps) {
 	const [intelData, setIntelData] = useState<IntelDataItem[]>([]);
 	const [filteredData, setFilteredData] = useState<IntelDataItem[]>([]);
+
 	const [totalResourceCount, setTotalResourceCount] = useState<number>(0);
+	const [resourceTotals, setResourceTotals] = useState<{
+		[key: string]: number;
+	}>({});
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -52,30 +58,47 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 
 		setFilteredData(matched);
 
-		// Calculate total of all resource values
-		const total = matched.reduce((acc, item) => {
-			const workshopTotal = item.resources.reduce((sum, resource) => {
-				const [_, value] = Object.entries(resource)[0];
-				return sum + parseInt(value);
-			}, 0);
-			return acc + workshopTotal;
-		}, 0);
+		let total = 0;
+		const totalsMap: { [key: string]: number } = {};
+
+		matched.forEach((item) => {
+			item.resources.forEach((res) => {
+				const [name, val] = Object.entries(res)[0];
+				const value = parseInt(val);
+
+				// Sum per "ماده"
+				if (!totalsMap[name]) totalsMap[name] = 0;
+				totalsMap[name] += value;
+
+				// Sum total
+				total += value;
+			});
+		});
 
 		setTotalResourceCount(total);
+		setResourceTotals(totalsMap);
 	}, [selectedDays, intelData]);
 
 	return (
 		<>
-			<div className="grid grid-cols-2  items-center justify-center gap-5 px-20">
+			<div className="grid grid-cols-2 items-center justify-center gap-5 px-20">
 				{filteredData.length === 0 ? (
-					<p className="text-gray-500">
-						هیچ داده‌ای برای تاریخ‌های انتخاب‌شده وجود ندارد.
+					<p className="text-gray-500 text-center col-span-full">
+						هیچ داده‌ای برای تاریخ‌ انتخاب‌ شده وجود ندارد.
 					</p>
 				) : (
 					<>
-						<div className="col-span-full p-4 pt-3 bg-green-100 border border-green-300 rounded-lg text-center font-semibold text-green-800">
-							مجموع مواد اولیه: {totalResourceCount} تن
+						<div className="col-span-full p-4 pt-3 bg-green-100 border border-green-300 rounded-lg  font-semibold text-green-800">
+							<p>مجموع مواد اولیه: {totalResourceCount} تن</p>
+							<ul className="grid grid-cols-1 sm:grid-cols-1 gap-y-1 gap-x-6 mt-2 text-sm text-right">
+								{Object.entries(resourceTotals).map(([key, value], i) => (
+									<li key={i} className="flex gap-1">
+										<span className="font-medium">{key}:</span> {value} تن
+									</li>
+								))}
+							</ul>
 						</div>
+
 						{filteredData.map((item, idx) => {
 							// Step 1: check if this item matches a selected day
 							const matchedSelected = selectedDays.find(
@@ -101,7 +124,8 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 									{/* @ts-ignore */}
 									<CardHeader className="pb-2 bg-inherit  shadow-none">
 										<h3 className="text-lg font-semibold mb-2">
-											کارگاه: {item.workshop}
+											کارگاه: {item.workshop} | مسئول: {item.manager} | شماره
+											تماس: {item.phone}
 										</h3>
 									</CardHeader>
 									{/* @ts-ignore */}
