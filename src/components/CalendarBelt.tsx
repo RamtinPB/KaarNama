@@ -171,16 +171,19 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 					);
 				})}
 			</div>
-			<div className="p-4 my-4 flex gap-4 items-center justify-center">
-				<span>از</span>
-				<div className="flex w-full gap-1.5">
+			<div className="p-4 my-4 flex flex-col md:flex-row gap-4 items-center justify-center">
+				<div className="flex w-full md:w-fit gap-1.5 items-center justify-center">
+					از
 					{/* @ts-ignore */}
 					<Input
 						type="text"
 						placeholder="YYYY-MM-DD"
 						value={rangeFrom}
 						onChange={(e) => handleDateChange(e, setRangeFrom)}
-						className="border p-2 rounded"
+						containerProps={{
+							className: "!w-fit",
+						}}
+						className="border p-2  rounded focus:outline-none focus:ring-1 focus:ring-black"
 					/>
 					{/* @ts-ignore */}
 					<IconButton
@@ -205,19 +208,24 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 						</svg>
 					</IconButton>
 				</div>
-				<span>تا</span>
-				{/* @ts-ignore */}
-				<Input
-					type="text"
-					placeholder="YYYY-MM-DD"
-					value={rangeTo}
-					onChange={(e) => handleDateChange(e, setRangeTo)}
-					className="border p-2 w-fit rounded"
-				/>
+				<div className="flex w-full md:w-fit items-center gap-1.5 justify-start md:justify-center">
+					تا
+					{/* @ts-ignore */}
+					<Input
+						type="text"
+						placeholder="YYYY-MM-DD"
+						value={rangeTo}
+						onChange={(e) => handleDateChange(e, setRangeTo)}
+						containerProps={{
+							className: "!w-full !md:!w-fit",
+						}}
+						className="border p-2  rounded focus:outline-none focus:ring-1 focus:ring-black"
+					/>
+				</div>
 				{/* @ts-ignore */}
 				<Button
 					onClick={handleApply}
-					className="bg-blue-500 text-white !min-w-fit px-4 py-2 rounded"
+					className="bg-blue-500 text-white w-full md:!w-fit px-4 py-2 rounded"
 				>
 					اعمال
 				</Button>
