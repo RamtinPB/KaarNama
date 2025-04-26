@@ -102,7 +102,7 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 
 	return (
 		<>
-			<div className="grid grid-cols-1 md:grid-cols-2 items-center justify-center gap-5 px-8 md:px-36">
+			<div className="grid grid-cols-1 md:grid-cols-2 items-center justify-center gap-7 px-8 md:px-14 lg:px-36">
 				{filteredData.length === 0 ? (
 					<p className="text-gray-500 text-center col-span-full">
 						هیچ داده‌ای برای تاریخ‌ انتخاب‌ شده وجود ندارد.
@@ -142,7 +142,7 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 								// @ts-ignore
 								<Card
 									key={idx}
-									className="bg-gray-200 shadow-lg p-4 rounded-xl h-full"
+									className="bg-gray-200 shadow-lg p-4  rounded-xl h-full"
 								>
 									{/* @ts-ignore */}
 									<CardBody className="flex flex-row justify-between gap-5">
@@ -195,7 +195,7 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 															</svg>
 															شماره تماس: {item.phone}
 														</span>
-														<hr className="lg:w-[431px]" />
+														<hr className="w-full" />
 													</h3>
 													<ul className="grid grid-cols-1 gap-y-1 gap-x-8 list-disc pr-5 text-md">
 														{item.resources.map((res, i) => {
