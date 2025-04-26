@@ -30,7 +30,7 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 		}
 	}, []);
 
-	const [selectedDays, setSelectedDays] = useState(() => [days[centerIndex]]); // default to today
+	const [selectedDays, setSelectedDays] = useState(() => [today]); // default to today
 
 	const [rangeFrom, setRangeFrom] = useState("");
 	const [rangeTo, setRangeTo] = useState("");
@@ -131,7 +131,7 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 
 	return (
 		<>
-			<div className="overflow-x-auto py-10 whitespace-nowrap w-screen p-4 bg-gray-100">
+			<div className="overflow-x-auto py-10 whitespace-nowrap w-full p-4 bg-gray-100">
 				{days.map((day, i) => {
 					const isToday = day.isSame(today, "day");
 					const isSelected = selectedDays.some(
@@ -173,9 +173,9 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 					);
 				})}
 			</div>
-			<div className="p-4 my-4 w-screen flex flex-row gap-4 items-center justify-center">
+			<div className="p-4 my-4 flex gap-4 items-center justify-center">
 				<span>از</span>
-				<div className="flex gap-1">
+				<div className="flex w-full gap-1.5">
 					{/* @ts-ignore */}
 					<Input
 						type="text"
@@ -189,7 +189,7 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 						onClick={() => {
 							setRangeFrom(today.format("YYYY-MM-DD"));
 						}}
-						className="bg-blue-500 !p-2 text-white  rounded"
+						className="bg-blue-500 w-10 h-10 text-white flex items-center justify-center rounded"
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -214,12 +214,12 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 					placeholder="YYYY-MM-DD"
 					value={rangeTo}
 					onChange={(e) => handleDateChange(e, setRangeTo)}
-					className="border p-2 rounded"
+					className="border p-2 w-fit rounded"
 				/>
 				{/* @ts-ignore */}
 				<Button
 					onClick={handleApply}
-					className="bg-blue-500 text-white px-4 py-2 rounded"
+					className="bg-blue-500 text-white !min-w-fit px-4 py-2 rounded"
 				>
 					اعمال
 				</Button>

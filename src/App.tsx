@@ -13,7 +13,10 @@ function App() {
 	return (
 		<>
 			<div className="flex flex-col gap-7 pb-10" style={{ direction: "rtl" }}>
-				<div id="calendar_belt">
+				<div
+					id="calendar_belt"
+					className="flex flex-col items-center justify-center"
+				>
 					<CalendarBelt onSelectDays={setSelectedDays} />
 				</div>
 				<div id="cards" className=" flex flex-col items center justify-center">
