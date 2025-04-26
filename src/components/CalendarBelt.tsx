@@ -129,7 +129,7 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 
 	return (
 		<>
-			<div className="overflow-x-auto py-10 whitespace-nowrap w-full p-4 bg-gray-100">
+			<div className="overflow-x-auto py-10 whitespace-nowrap w-full p-4 bg-gray-100 ">
 				{days.map((day, i) => {
 					const isToday = day.isSame(today, "day");
 					const isSelected = selectedDays.some(
