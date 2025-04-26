@@ -1,7 +1,7 @@
 import { Button, IconButton, Input } from "@material-tailwind/react";
 import dayjs from "../utils/dayjs-jalali";
 import { useState, useRef, useEffect } from "react";
-import { getJalaliDays, DAYS_COUNT } from "../utils/JalaliDays";
+import { getJalaliDays } from "../utils/JalaliDays";
 
 interface CalendarBeltProps {
 	onSelectDays: (days: dayjs.Dayjs[]) => void;
@@ -10,8 +10,6 @@ interface CalendarBeltProps {
 const days = getJalaliDays();
 
 export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
-	const centerIndex = Math.floor(DAYS_COUNT / 2); // center is today
-
 	const today = dayjs()
 		.subtract(1, "day")
 		.startOf("day")
