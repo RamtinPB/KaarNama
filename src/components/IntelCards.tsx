@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import dayjs from "../utils/dayjs-jalali";
-import { Button, Card, CardBody, CardHeader } from "@material-tailwind/react";
+import { Button, Card, CardBody } from "@material-tailwind/react";
 import { getJalaliDays } from "../utils/JalaliDays";
 
 const allDays = getJalaliDays();
@@ -25,6 +25,9 @@ interface IntelDataItem {
 export default function IntelCards({ selectedDays }: IntelCardsProps) {
 	const [intelData, setIntelData] = useState<IntelDataItem[]>([]);
 	const [filteredData, setFilteredData] = useState<IntelDataItem[]>([]);
+	const [groupedData, setGroupedData] = useState<
+		{ date: string; items: IntelDataItem[] }[]
+	>([]);
 
 	const [totalResourceCount, setTotalResourceCount] = useState<number>(0);
 	const [resourceTotals, setResourceTotals] = useState<{
@@ -58,6 +61,24 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 
 		setFilteredData(matched);
 
+		// Group matched data by date
+		const grouped: { [date: string]: IntelDataItem[] } = {};
+
+		matched.forEach((item) => {
+			if (!grouped[item.date]) {
+				grouped[item.date] = [];
+			}
+			grouped[item.date].push(item);
+		});
+
+		// Convert the grouped object into an array
+		const groupedArray = Object.entries(grouped).map(([date, items]) => ({
+			date,
+			items,
+		}));
+
+		setGroupedData(groupedArray);
+
 		let total = 0;
 		const totalsMap: { [key: string]: number } = {};
 
@@ -88,21 +109,23 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 					</p>
 				) : (
 					<>
-						<div className="col-span-full p-4 pt-3 bg-green-100 border border-green-300 rounded-lg  font-semibold text-green-800">
-							<p>مجموع مواد اولیه: {totalResourceCount} تن</p>
-							<ul className="grid grid-cols-1 sm:grid-cols-1 gap-y-1 gap-x-6 mt-2 text-sm text-right">
+						<div className="h-full p-4 pt-3 bg-green-100 border border-green-300 rounded-lg font-semibold text-green-800">
+							<h2 className="text-xl">
+								مجموع مواد اولیه: {totalResourceCount} تن
+							</h2>
+							<ul className="grid grid-cols-1 gap-y-1.5 gap-x-8 mt-3 text-md pr-5">
 								{Object.entries(resourceTotals).map(([key, value], i) => (
-									<li key={i} className="flex gap-1">
-										<span className="font-medium">{key}:</span> {value} تن
+									<li key={i} className="list-disc">
+										<span className="font-semibold">{key}:</span> {value} تن
 									</li>
 								))}
 							</ul>
 						</div>
 
-						{filteredData.map((item, idx) => {
+						{groupedData.map((group, idx) => {
 							// Step 1: check if this item matches a selected day
 							const matchedSelected = selectedDays.find(
-								(d) => d.format("YYYY-MM-DD") === item.date
+								(d) => d.format("YYYY-MM-DD") === group.date
 							);
 
 							// Step 2: find the equivalent object from the original `days` array
@@ -122,25 +145,28 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 									className="bg-gray-200 shadow-lg p-4 rounded-xl h-full container"
 								>
 									{/* @ts-ignore */}
-									<CardHeader className="pb-2 bg-inherit  shadow-none">
-										<h3 className="text-lg font-semibold mb-2">
-											کارگاه: {item.workshop} | مسئول: {item.manager} | شماره
-											تماس: {item.phone}
-										</h3>
-									</CardHeader>
-									{/* @ts-ignore */}
 									<CardBody className="flex flex-row justify-between">
-										<ul className="list-disc pr-5 text-md">
-											{item.resources.map((res, i) => {
-												const [key, value] = Object.entries(res)[0];
-												return (
-													<li key={i}>
-														<span className="font-medium">{key}:</span> {value}{" "}
-														تن
-													</li>
-												);
-											})}
-										</ul>
+										<div className="flex flex-col gap-10">
+											{group.items.map((item, subIdx) => (
+												<div key={subIdx}>
+													<h3 className="text-lg font-semibold mb-2">
+														کارگاه: {item.workshop} | مسئول: {item.manager} |
+														شماره تماس: {item.phone}
+													</h3>
+													<ul className="grid grid-cols-1 gap-y-1 gap-x-8 list-disc pr-5 text-md">
+														{item.resources.map((res, i) => {
+															const [key, value] = Object.entries(res)[0];
+															return (
+																<li key={i}>
+																	<span className="font-medium">{key}:</span>{" "}
+																	{value} تن
+																</li>
+															);
+														})}
+													</ul>
+												</div>
+											))}
+										</div>
 										{/* @ts-ignore */}
 										<Button
 											key={idx}
