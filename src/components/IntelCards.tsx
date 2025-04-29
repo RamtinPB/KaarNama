@@ -262,7 +262,7 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 					</Button>
 				</ButtonGroup>
 			</div>
-			<div className="grid grid-cols-1 md:grid-cols-2 items-center justify-center gap-7 px-8 md:px-14 lg:px-36">
+			<div className="grid grid-cols-1 md:grid-cols-2 items-center justify-center gap-7 px-8 md:px-12 lg:px-36">
 				{filteredData.length === 0 ? (
 					<p className="text-gray-500 text-center col-span-full">
 						هیچ داده‌ای برای تاریخ‌ انتخاب‌ شده وجود ندارد.
