@@ -4,6 +4,7 @@ import DayBasedIntelCards from "./DayBasedIntelCards";
 import { Button, ButtonGroup } from "@material-tailwind/react";
 import { getJalaliDays } from "../utils/JalaliDays";
 import { generateDistribution } from "../Distribution/Distribute";
+import WorkshopBasedIntelCards from "./WorkShopBasedIntelCards";
 
 interface IntelCardsProps {
 	selectedDays: dayjs.Dayjs[];
@@ -36,9 +37,18 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 
 	const [intelData, setIntelData] = useState<IntelDataItem[]>([]);
 	const [workshops, setWorkshops] = useState<Workshop[]>([]);
+
 	const [filteredData, setFilteredData] = useState<IntelDataItem[]>([]);
 	const [groupedData_DayBased, setGroupedData_DayBased] = useState<
 		{ date: string; items: IntelDataItem[] }[]
+	>([]);
+	const [groupedData_WorkshopBased, setGroupedData_WorkshopBased] = useState<
+		{
+			workshop: string;
+			manager: string;
+			phone: string;
+			items: IntelDataItem[];
+		}[]
 	>([]);
 
 	const [totalResourceCount, setTotalResourceCount] = useState<number>(0);
@@ -112,9 +122,9 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 	}, [workshops]);
 
 	// Log intelData whenever it changes
-	useEffect(() => {
-		console.log("intelData updated:", intelData);
-	}, [intelData]);
+	// useEffect(() => {
+	// 	console.log("intelData updated:", intelData);
+	// }, [intelData]);
 
 	////////////---------------------------------------------------------
 
@@ -147,8 +157,41 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 			items,
 		}));
 
-		console.log(groupedArray);
+		console.log("grouped day based: ", groupedArray);
 		setGroupedData_DayBased(groupedArray);
+
+		// Group matched data by workshop, and store manager and phone too
+		const workshopGroupedMap: {
+			[workshop: string]: {
+				manager: string;
+				phone: string;
+				items: IntelDataItem[];
+			};
+		} = {};
+
+		matched.forEach((item) => {
+			if (!workshopGroupedMap[item.workshop]) {
+				workshopGroupedMap[item.workshop] = {
+					manager: item.manager,
+					phone: item.phone,
+					items: [],
+				};
+			}
+			workshopGroupedMap[item.workshop].items.push(item);
+		});
+
+		// Convert the map to array
+		const workshopGroupedArray = Object.entries(workshopGroupedMap).map(
+			([workshop, data]) => ({
+				workshop,
+				manager: data.manager,
+				phone: data.phone,
+				items: data.items,
+			})
+		);
+
+		console.log("grouped workshop based: ", workshopGroupedArray);
+		setGroupedData_WorkshopBased(workshopGroupedArray);
 
 		let total = 0;
 		const totalsMap: { [key: string]: number } = {};
@@ -174,7 +217,7 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 	return (
 		<>
 			<div
-				className="flex justify-center items-center  pb-5 "
+				className="flex justify-center items-center pb-10 "
 				style={{ direction: "ltr" }}
 			>
 				{/* @ts-ignore */}
@@ -245,7 +288,10 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 								selectedDays={selectedDays}
 							/>
 						) : (
-							<p></p>
+							<WorkshopBasedIntelCards
+								selectedDays={selectedDays}
+								groupedData_WorkshopBased={groupedData_WorkshopBased}
+							/>
 						)}
 					</>
 				)}

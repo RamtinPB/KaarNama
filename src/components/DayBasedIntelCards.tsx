@@ -117,7 +117,7 @@ export default function DayBasedIntelCards({
 							<div
 								key={idx}
 								className={
-									"inline-block mx-2 p-2 w-24 max-h-fit !bg-white rounded-lg text-center !border-0 !text-black shadow-md !cursor-default"
+									"inline-block mx-2 p-2 w-24 max-h-fit !bg-white rounded-lg text-center !border-0 !text-black shadow-md "
 								}
 							>
 								<div className="text-sm font-medium">
