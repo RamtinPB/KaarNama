@@ -30,6 +30,10 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 
 	const [selectedDays, setSelectedDays] = useState(() => [today]); // default to today
 
+	useEffect(() => {
+		onSelectDays(selectedDays);
+	}, [selectedDays]);
+
 	const [rangeFrom, setRangeFrom] = useState("");
 	const [rangeTo, setRangeTo] = useState("");
 
@@ -46,14 +50,42 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 			return;
 		}
 
-		// Parse the dates as Jalali dates
-		const from = dayjs(rangeFrom, "YYYY-MM-DD", true).locale("fa");
-		const to = dayjs(rangeTo, "YYYY-MM-DD", true).locale("fa");
+		// Find the matching dayjs object for rangeFrom
+		const from = days.find((day) => day.format("YYYY-MM-DD") === rangeFrom);
+
+		// Find the matching dayjs object for rangeTo
+		const to = days.find((day) => day.format("YYYY-MM-DD") === rangeTo);
 
 		// Validate if dates are within the range of days array and 'from' is earlier than 'to'
-		if (!from.isValid() || !to.isValid()) {
-			alert("Invalid date(s).");
+		if (!from?.isValid() || !to?.isValid()) {
+			alert("Invalid date(s). Please check if the dates exist.");
 			return;
+		}
+
+		// Function to adjust an invalid "31st" or out-of-range date to the last valid day
+		const fixInvalidJalaliDate = (date: dayjs.Dayjs): dayjs.Dayjs => {
+			// Check if the date exceeds the number of days in the month
+			if (date.date() > date.daysInMonth()) {
+				// Adjust the date to the last valid day of the current month
+				return date.endOf("month"); // This will move the date to the last valid day of the month
+			}
+			return date;
+		};
+
+		// Fix the 'from' and 'to' dates if necessary
+		const fixedFrom = fixInvalidJalaliDate(from);
+		const fixedTo = fixInvalidJalaliDate(to);
+
+		// If the fixed dates are different, show a message
+		if (fixedFrom.isAfter(from)) {
+			alert(
+				`The date ${from.format("YYYY-MM-DD")} was invalid. Adjusting to the last valid day.`
+			);
+		}
+		if (fixedTo.isAfter(to)) {
+			alert(
+				`The date ${to.format("YYYY-MM-DD")} was invalid. Adjusting to the last valid day.`
+			);
 		}
 
 		// Convert the first and last valid days in the days[] array to Jalali dates
@@ -61,14 +93,8 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 		const lastDay = dayjs(days[days.length - 1]).locale("fa");
 
 		// Validate if the dates are valid Jalali dates
-		if (!from.isValid() || !to.isValid()) {
-			alert("Invalid date(s).");
-			return;
-		}
-
-		// Convert Jalali dayjs objects to formatted strings
-		const fromStr = from.format("YYYY-MM-DD");
-		const toStr = to.format("YYYY-MM-DD");
+		const fromStr = fixedFrom.format("YYYY-MM-DD");
+		const toStr = fixedTo.format("YYYY-MM-DD");
 		const firstStr = firstDay.format("YYYY-MM-DD");
 		const lastStr = lastDay.format("YYYY-MM-DD");
 
@@ -82,26 +108,27 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 
 		// Validate 'from' is not after 'to'
 		if (fromStr > toStr) {
-			alert("The 'from' date must be earlier than or equal to the 'to' date.");
+			alert("The 'from' date must be earlier than the 'to' date.");
 			return;
 		}
 
-		if (from.isAfter(to)) {
+		if (fixedFrom.isAfter(fixedTo)) {
 			alert("The 'from' date must be earlier than the 'to' date.");
 			return;
 		}
 
 		// Process the range and select days
 		const range = [];
-		let current = from.clone();
-		while (current.isSameOrBefore(to, "day")) {
-			range.push(current.clone());
+		let current = fixedFrom.clone();
+		while (current.isSameOrBefore(fixedTo, "day")) {
+			// Ensure each day in the range is a valid Jalali date before adding it
+			if (current.isValid()) {
+				range.push(current.clone());
+			}
 			current = current.add(1, "day");
 		}
 
 		setSelectedDays(range); // set as array
-		onSelectDays(range);
-		//console.log(range.map((d) => d.format("YYYY-MM-DD")));
 	};
 
 	const handleDateChange = (
@@ -129,7 +156,7 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 
 	return (
 		<>
-			<div className="overflow-x-auto py-10 whitespace-nowrap w-full p-4 bg-gray-100 ">
+			<div className="overflow-x-auto py-10 whitespace-nowrap w-full  p-4 bg-gray-100">
 				{days.map((day, i) => {
 					const isToday = day.isSame(today, "day");
 					const isSelected = selectedDays.some(
@@ -139,15 +166,15 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 					const isBeforeToday = day.isBefore(today, "day");
 
 					const baseClasses =
-						"inline-block mx-2 p-2 w-24 rounded-lg text-center text-black shadow-sm hover:bg-blue-200";
+						"inline-block mx-2 p-2 w-24 rounded-lg text-center text-black shadow-md hover:bg-blue-500 hover:text-white focus:outline-none";
 					const isSelectedClass = isSelected
 						? isBeforeToday
 							? "bg-blue-300 text-white" // lighter blue for past selected
-							: "bg-blue-500 text-white" // default blue for present/future selected
+							: "bg-blue-800 text-white" // default blue for present/future selected
 						: isBeforeToday
 							? "bg-gray-300 text-gray-500"
 							: "bg-white";
-					const borderClass = isToday ? "!border-3 !border-black" : "";
+					const borderClass = isToday ? "!border-[3px] !border-black" : "";
 
 					const className = `${baseClasses} ${isSelectedClass} ${borderClass}`;
 
@@ -155,44 +182,46 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 
 					return (
 						// @ts-ignore
-						<Button
+						<button
 							key={i}
 							ref={isToday ? todayRef : null}
 							onClick={() => {
-								setSelectedDays([day]), onSelectDays([day]);
+								setSelectedDays([day]);
 							}}
 							className={className}
 						>
-							<div className="text-sm text">
+							<div className="text-base font-normal">
 								{day.add(1, "day").format("dddd")}
 							</div>
-							<div className="text-3xl font-bold">{day.format("D")}</div>
-							<div className="text-sm">{day.format("MMMM")}</div>
-							<div className="text-xs">{day.format("YYYY")}</div>
-						</Button>
+							<div className="text-3xl font-semibold">{day.format("D")}</div>
+							<div className="text-base font-normal">{day.format("MMMM")}</div>
+							<div className="text-sm font-normal">{day.format("YYYY")}</div>
+						</button>
 					);
 				})}
 			</div>
 			<div className="p-4 my-4 flex flex-col md:flex-row gap-4 items-center justify-center">
 				<div className="flex w-full md:w-fit gap-1.5 items-center justify-center">
-					از
 					{/* @ts-ignore */}
 					<Input
 						type="text"
+						label="از تاریخ"
 						placeholder="YYYY-MM-DD"
+						variant="standard"
+						color="black"
 						value={rangeFrom}
 						onChange={(e) => handleDateChange(e, setRangeFrom)}
 						containerProps={{
 							className: "!w-fit",
 						}}
-						className="border p-2  rounded focus:outline-none focus:ring-1 focus:ring-black"
+						className=" "
 					/>
 					{/* @ts-ignore */}
 					<IconButton
 						onClick={() => {
 							setRangeFrom(today.format("YYYY-MM-DD"));
 						}}
-						className="bg-blue-500 w-10 h-10 text-white flex items-center justify-center rounded"
+						className="w-10 h-10 text-white flex items-center justify-center rounded-pill"
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -200,7 +229,7 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 							viewBox="0 0 24 24"
 							strokeWidth="1.5"
 							stroke="currentColor"
-							className="size-4"
+							className="size-5"
 						>
 							<path
 								strokeLinecap="round"
@@ -211,23 +240,27 @@ export default function CalendarBelt({ onSelectDays }: CalendarBeltProps) {
 					</IconButton>
 				</div>
 				<div className="flex w-full md:w-fit items-center gap-1.5 justify-start md:justify-center">
-					تا
 					{/* @ts-ignore */}
 					<Input
 						type="text"
+						label="تا تاریخ"
 						placeholder="YYYY-MM-DD"
+						variant="standard"
+						color="black"
 						value={rangeTo}
 						onChange={(e) => handleDateChange(e, setRangeTo)}
 						containerProps={{
 							className: "!w-full !md:!w-fit",
 						}}
-						className="border p-2  rounded focus:outline-none focus:ring-1 focus:ring-black"
+						className=""
 					/>
 				</div>
 				{/* @ts-ignore */}
 				<Button
+					size="md"
+					color="black"
 					onClick={handleApply}
-					className="bg-blue-500 text-white w-full md:!w-fit px-4 py-2 rounded"
+					className=" text-white !text-lg w-full md:!w-fit h-10 px-4 py-2 rounded-pill"
 				>
 					اعمال
 				</Button>

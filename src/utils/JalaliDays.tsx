@@ -12,3 +12,9 @@ export const getJalaliDays = () =>
 			.calendar("jalali")
 			.locale("fa")
 	);
+
+export const today = dayjs()
+	.subtract(1, "day")
+	.startOf("day")
+	.calendar("jalali")
+	.locale("fa");
