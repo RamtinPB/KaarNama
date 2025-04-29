@@ -157,7 +157,7 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 			items,
 		}));
 
-		console.log("grouped day based: ", groupedArray);
+		//console.log("grouped day based: ", groupedArray);
 		setGroupedData_DayBased(groupedArray);
 
 		// Group matched data by workshop, and store manager and phone too
@@ -190,7 +190,7 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 			})
 		);
 
-		console.log("grouped workshop based: ", workshopGroupedArray);
+		//console.log("grouped workshop based: ", workshopGroupedArray);
 		setGroupedData_WorkshopBased(workshopGroupedArray);
 
 		let total = 0;

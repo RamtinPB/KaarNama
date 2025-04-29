@@ -7,7 +7,7 @@ import IntelCards from "./components/IntelCards";
 function App() {
 	const [selectedDays, setSelectedDays] = useState<dayjs.Dayjs[]>([]);
 
-	console.log(selectedDays.map((d) => d.format("YYYY-MM-DD")));
+	//console.log(selectedDays.map((d) => d.format("YYYY-MM-DD")));
 	//console.log(selectedDays);
 
 	return (
