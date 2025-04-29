@@ -147,6 +147,7 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 			items,
 		}));
 
+		console.log(groupedArray);
 		setGroupedData_DayBased(groupedArray);
 
 		let total = 0;
@@ -172,11 +173,13 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 
 	return (
 		<>
-			{/* <div
+			<div
 				className="flex justify-center items-center  pb-5 "
 				style={{ direction: "ltr" }}
 			>
+				{/* @ts-ignore */}
 				<ButtonGroup>
+					{/* @ts-ignore */}
 					<Button
 						className="bg-black text-sm flex gap-1 items-center "
 						onClick={() => {
@@ -197,6 +200,7 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 						</svg>
 						<span>نمایش کارگاه محور</span>
 					</Button>
+					{/* @ts-ignore */}
 					<Button
 						className="bg-black text-sm flex gap-2 items-center "
 						onClick={() => {
@@ -214,7 +218,7 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 						<span>نمایش روز محور</span>
 					</Button>
 				</ButtonGroup>
-			</div> */}
+			</div>
 			<div className="grid grid-cols-1 md:grid-cols-2 items-center justify-center gap-7 px-8 md:px-14 lg:px-36">
 				{filteredData.length === 0 ? (
 					<p className="text-gray-500 text-center col-span-full">

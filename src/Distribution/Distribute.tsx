@@ -93,5 +93,7 @@ export function generateDistribution(
 		}
 	});
 
+	result.sort((a, b) => a.date.localeCompare(b.date));
+
 	return result;
 }

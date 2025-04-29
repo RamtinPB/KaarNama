@@ -40,8 +40,6 @@ export default function DayBasedIntelCards({
 							d.format("YYYY-MM-DD") === matchedSelected?.format("YYYY-MM-DD")
 					) ?? null;
 
-				//console.log(day);
-
 				return (
 					// @ts-ignore
 					<Card
