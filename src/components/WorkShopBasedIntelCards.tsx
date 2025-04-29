@@ -41,7 +41,7 @@ export default function WorkshopBasedIntelCards({
 						className="bg-gray-300 shadow-lg p-4 rounded-xl h-full"
 					>
 						{/* @ts-ignore */}
-						<CardHeader className="bg-inherit shadow-none m-0 p-4">
+						<CardHeader className="bg-inherit shadow-none m-0 p-4 pb-0">
 							<h3 className="flex flex-col gap-1.5 mb-2 ">
 								<span className="text-xl font-bold flex items-center gap-1">
 									<svg
@@ -91,7 +91,7 @@ export default function WorkshopBasedIntelCards({
 							</h3>
 						</CardHeader>
 						{/* @ts-ignore */}
-						<CardBody className="flex flex-col gap-10">
+						<CardBody className="flex flex-col gap-10 pt-0">
 							{group.items.map((item, subIdx) => {
 								const matchedSelected = selectedDays.find(
 									(d) => d.format("YYYY-MM-DD") === item.date
