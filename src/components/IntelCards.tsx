@@ -21,6 +21,7 @@ interface IntelDataItem {
 	manager: string;
 	phone: string;
 	resources: ResourceItem[];
+	stage: number;
 }
 
 interface Workshop {
@@ -47,7 +48,10 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 			workshop: string;
 			manager: string;
 			phone: string;
-			items: IntelDataItem[];
+			itemsByStage: {
+				stage: number;
+				items: IntelDataItem[];
+			}[];
 		}[]
 	>([]);
 
@@ -161,37 +165,53 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 		setGroupedData_DayBased(groupedArray);
 
 		// Group matched data by workshop, and store manager and phone too
-		const workshopGroupedMap: {
+		// Workshop and stage based grouping
+		const workshopStageGroupedMap: {
 			[workshop: string]: {
 				manager: string;
 				phone: string;
-				items: IntelDataItem[];
+				stages: {
+					[stage: number]: IntelDataItem[];
+				};
 			};
 		} = {};
 
+		// Use stage from intelData directly
 		matched.forEach((item) => {
-			if (!workshopGroupedMap[item.workshop]) {
-				workshopGroupedMap[item.workshop] = {
+			const { workshop, stage } = item;
+
+			if (!workshopStageGroupedMap[workshop]) {
+				workshopStageGroupedMap[workshop] = {
 					manager: item.manager,
 					phone: item.phone,
-					items: [],
+					stages: {},
 				};
 			}
-			workshopGroupedMap[item.workshop].items.push(item);
+
+			if (!workshopStageGroupedMap[workshop].stages[stage]) {
+				workshopStageGroupedMap[workshop].stages[stage] = [];
+			}
+
+			workshopStageGroupedMap[workshop].stages[stage].push(item);
 		});
 
-		// Convert the map to array
-		const workshopGroupedArray = Object.entries(workshopGroupedMap).map(
+		// Convert to array with nested stage arrays
+		const workshopGroupedArray = Object.entries(workshopStageGroupedMap).map(
 			([workshop, data]) => ({
 				workshop,
 				manager: data.manager,
 				phone: data.phone,
-				items: data.items,
+				itemsByStage: Object.entries(data.stages)
+					.map(([stage, items]) => ({
+						stage: Number(stage),
+						items,
+					}))
+					.sort((a, b) => a.stage - b.stage), // optional: sort by stage
 			})
 		);
 
-		//console.log("grouped workshop based: ", workshopGroupedArray);
-		setGroupedData_WorkshopBased(workshopGroupedArray);
+		console.log("grouped workshop by stage:", workshopGroupedArray);
+		setGroupedData_WorkshopBased(workshopGroupedArray as any); // cast if needed
 
 		let total = 0;
 		const totalsMap: { [key: string]: number } = {};

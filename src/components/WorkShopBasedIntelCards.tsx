@@ -14,6 +14,7 @@ interface IntelDataItem {
 	manager: string;
 	phone: string;
 	resources: ResourceItem[];
+	stage?: number;
 }
 
 interface WorkshopBasedIntelCardsProps {
@@ -21,7 +22,10 @@ interface WorkshopBasedIntelCardsProps {
 		workshop: string;
 		manager: string;
 		phone: string;
-		items: IntelDataItem[];
+		itemsByStage: {
+			stage: number;
+			items: IntelDataItem[];
+		}[];
 	}[];
 	selectedDays: dayjs.Dayjs[];
 }
@@ -91,53 +95,74 @@ export default function WorkshopBasedIntelCards({
 							</h3>
 						</CardHeader>
 						{/* @ts-ignore */}
-						<CardBody className="flex flex-col gap-10 pt-0">
-							{group.items.map((item, subIdx) => {
-								const matchedSelected = selectedDays.find(
-									(d) => d.format("YYYY-MM-DD") === item.date
-								);
+						<CardBody className="flex flex-col gap-10  pt-4 ">
+							{Object.entries(
+								group.itemsByStage.reduce(
+									(acc, item) => {
+										const stage = item.stage ?? 0;
+										if (!acc[stage]) acc[stage] = [];
+										acc[stage].push(...(item.items ?? []));
 
-								if (!matchedSelected) return null;
-
-								const day =
-									allDays.find(
-										(d) =>
-											d.format("YYYY-MM-DD") ===
-											matchedSelected.format("YYYY-MM-DD")
-									) ?? null;
-
+										return acc;
+									},
+									{} as Record<number, IntelDataItem[]>
+								)
+							).map(([stage, itemsForStage]) => {
 								return (
-									<div
-										key={subIdx}
-										className="flex gap-5 items-start border-t-2 border-gray-500 pt-2"
-									>
-										{/* Resource List */}
-										<ul className="grid grid-cols-1 gap-y-1 gap-x-8 list-disc pr-5 text-md flex-1">
-											{item.resources.map((res, i) => {
-												const [key, value] = Object.entries(res)[0];
+									<div key={stage} className="mb-6 border-t-2 border-gray-500">
+										<h4 className="text-lg font-bold text-blue-900 mb-4">
+											مرحله: {stage}
+										</h4>
+										<div className="grid grid-cols-3 gap-10 ">
+											{itemsForStage.map((item, subIdx) => {
+												const matchedSelected = selectedDays.find(
+													(d) => d.format("YYYY-MM-DD") === item.date
+												);
+												if (!matchedSelected) return null;
+
+												const day =
+													allDays.find(
+														(d) =>
+															d.format("YYYY-MM-DD") ===
+															matchedSelected.format("YYYY-MM-DD")
+													) ?? null;
+
 												return (
-													<li key={i}>
-														<span className="font-medium">{key}:</span> {value}{" "}
-														تن
-													</li>
+													<div
+														key={subIdx}
+														className="flex flex-col gap-5 items-start pt-2 w-fit"
+													>
+														{/* Date Card */}
+														<div className="inline-block mx-2 p-2 w-24 bg-white rounded-lg text-center !border-0 text-black shadow-md">
+															<div className="text-sm font-medium">
+																{day?.add(1, "day").format("dddd")}
+															</div>
+															<div className="text-3xl font-bold">
+																{day?.format("D")}
+															</div>
+															<div className="text-sm font-medium">
+																{day?.format("MMMM")}
+															</div>
+															<div className="text-xs font-medium">
+																{day?.format("YYYY")}
+															</div>
+														</div>
+
+														{/* Resource List */}
+														<ul className="grid grid-cols-1 gap-y-1 gap-x-8 list-disc pr-5 text-md flex-1">
+															{item.resources.map((res, i) => {
+																const [key, value] = Object.entries(res)[0];
+																return (
+																	<li key={i}>
+																		<span className="font-medium">{key}:</span>{" "}
+																		{value} تن
+																	</li>
+																);
+															})}
+														</ul>
+													</div>
 												);
 											})}
-										</ul>
-
-										{/* Date Card */}
-										<div className="inline-block mx-2 p-2 w-24 bg-white rounded-lg text-center !border-0 text-black shadow-md ">
-											<div className="text-sm font-medium">
-												{day?.add(1, "day").format("dddd")}
-											</div>
-											<div className="text-3xl font-bold">
-												{day?.format("D")}
-											</div>
-											<div className="text-sm font-medium">
-												{day?.format("MMMM")}
-											</div>
-											<div className="text-xs font-medium">
-												{day?.format("YYYY")}
-											</div>
 										</div>
 									</div>
 								);

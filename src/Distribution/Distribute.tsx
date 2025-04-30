@@ -5,11 +5,11 @@ type Workshop = {
 	workshop: string;
 	manager: string;
 	phone: string;
-	resourceLimits: Record<string, number>; // example: { "ماده 1": 100, "ماده 2": 200 }
+	resourceLimits: Record<string, number>;
 };
 
 interface ResourceItem {
-	[key: string]: string; // A resource item is a key-value pair, where the key is the resource name and value is a string
+	[key: string]: string;
 }
 
 type DistributionEntry = {
@@ -17,83 +17,108 @@ type DistributionEntry = {
 	workshop: string;
 	manager: string;
 	phone: string;
-	resources: ResourceItem[]; // now an array of ResourceItem
+	resources: ResourceItem[];
+	stage: number; // New field for stage number
 };
 
 // the main function
 export function generateDistribution(
 	workshops: Workshop[],
 	availableResources: string[],
-	daysArray: string[], // expect dates like YYYY/MM/DD
-	coverageDays: number = 45 // how many days the supply should cover
+	daysArray: string[],
+	coverageDays: number = 45
 ): DistributionEntry[] {
 	const result: DistributionEntry[] = [];
 
-	// Convert daysArray to YYYY-MM-DD format if it's not already in that format
+	// Format days to YYYY-MM-DD
 	const formattedDaysArray = daysArray.map((day) => day.replace(/\//g, "-"));
 
-	// simple logic: distribute every 7 days
-	const distributionInterval = 7;
-	const distributionsNeeded = Math.ceil(coverageDays / distributionInterval);
-
-	// Get the index of the first day that is after today
+	// Slice only the next 45 days starting from today
 	const todayIndex = formattedDaysArray.findIndex(
 		(day) => day > today.format("YYYY-MM-DD")
 	);
-
-	// If no future day is found, return an empty distribution (safety check)
 	if (todayIndex === -1) return [];
 
-	// Loop over workshops
-	workshops.forEach((workshop) => {
+	const validDays = formattedDaysArray.slice(
+		todayIndex,
+		todayIndex + coverageDays
+	);
+
+	// Function to pick random consecutive days within remaining slots
+	function getRandomConsecutiveDays(
+		startIdx: number,
+		maxLength: number
+	): number[] {
+		const stageLength = Math.min(
+			maxLength,
+			Math.floor(Math.random() * 3) + 2 // Between 2 to 4 days
+		);
+		return Array.from({ length: stageLength }, (_, i) => startIdx + i);
+	}
+
+	workshops.forEach((workshop, workshopIdx) => {
 		const { workshop: workshopId, manager, phone, resourceLimits } = workshop;
 
-		//const workshopOffset = Math.floor(Math.random() * distributionInterval); // 0 to 6
-		const workshopOffset = workshops.indexOf(workshop); // simple stagger
+		// We will use a pointer to know which day we are in
+		let currentDayIndex = workshopIdx; // to stagger workshops a bit
+		let currentStage = 1; // Start with the first stage for each workshop
 
-		for (let dist = 0; dist < distributionsNeeded; dist++) {
-			const dayIndex =
-				todayIndex + workshopOffset + dist * distributionInterval;
+		for (const [material, totalAmount] of Object.entries(resourceLimits)) {
+			// Skip invalid materials
+			if (!availableResources.includes(material)) continue;
 
-			// If we exceed the available days, break out of the loop
-			if (dayIndex >= formattedDaysArray.length) break;
+			// Determine how many days this stage will take
+			if (currentDayIndex >= validDays.length) break;
 
-			const date = formattedDaysArray[dayIndex];
-			const resources: ResourceItem[] = [];
+			const stageDaysIndices = getRandomConsecutiveDays(
+				currentDayIndex,
+				validDays.length - currentDayIndex
+			);
 
-			// Only include resources with non-zero values
-			availableResources.forEach((resource) => {
-				const limit = resourceLimits[resource] || 0;
+			const numDays = stageDaysIndices.length;
+			if (numDays === 0) continue;
 
-				// Skip resources with a limit of 0
-				if (limit === 0) return;
+			// Distribute totalAmount across numDays with some randomness
+			let remaining = totalAmount;
+			const dailyDistributions: number[] = [];
 
-				// Distribute a fraction of the limit at each distribution
-				const baseAmount = limit / distributionsNeeded;
-				const variation = Math.random() * 0.3 - 0.15; // -15% to +15%
-				const perDistributionAmount = Math.max(
-					1,
-					Math.round(baseAmount * (1 + variation))
-				);
+			for (let i = 0; i < numDays; i++) {
+				if (i === numDays - 1) {
+					dailyDistributions.push(remaining); // Last day gets the rest
+				} else {
+					const base = Math.floor(totalAmount / numDays);
+					const variation = Math.floor(base * (Math.random() * 0.3 - 0.15));
+					const amount = Math.max(
+						1,
+						Math.min(remaining - (numDays - i - 1), base + variation)
+					);
+					dailyDistributions.push(amount);
+					remaining -= amount;
+				}
+			}
 
-				// Push the resource as a ResourceItem object to the resources array
-				resources.push({ [resource]: perDistributionAmount.toString() }); // Convert number to string
-			});
+			// Add to result with the stage number
+			stageDaysIndices.forEach((dayIdx, i) => {
+				if (dayIdx >= validDays.length) return;
+				const date = validDays[dayIdx];
+				const amount = dailyDistributions[i].toString();
 
-			// Add the entry to the result if there are resources to distribute
-			if (resources.length > 0) {
 				result.push({
 					date,
 					workshop: workshopId,
 					manager,
 					phone,
-					resources,
+					resources: [{ [material]: amount }],
+					stage: currentStage, // Add the current stage to the entry
 				});
-			}
+			});
+
+			// Advance pointer
+			currentDayIndex += numDays + 0; // leave x day gap between stages
+			currentStage++; // Increment the stage for the next material
 		}
 	});
 
 	result.sort((a, b) => a.date.localeCompare(b.date));
-
 	return result;
 }
