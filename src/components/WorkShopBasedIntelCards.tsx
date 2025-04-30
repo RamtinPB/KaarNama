@@ -125,22 +125,31 @@ export default function WorkshopBasedIntelCards({
 											</svg>
 
 											<h4 className="text-lg font-bold text-blue-900 ">
-												مرحله: {stage} -{" "}
-												{itemsForStage.reduce((sum, item) => {
+												{(() => {
+													const materialTotals: Record<string, number> = {};
+
+													itemsForStage.forEach((item) => {
+														item.resources.forEach((res) => {
+															for (const [key, value] of Object.entries(res)) {
+																if (!materialTotals[key])
+																	materialTotals[key] = 0;
+																materialTotals[key] += Number(value);
+															}
+														});
+													});
+
+													const totalWeight = Object.values(
+														materialTotals
+													).reduce((a, b) => a + b, 0);
+													const materialName =
+														Object.keys(materialTotals)[0] || "نامشخص";
+
 													return (
-														sum +
-														item.resources.reduce((resSum, res) => {
-															return (
-																resSum +
-																Object.values(res).reduce(
-																	(valSum, val) => valSum + Number(val),
-																	0
-																)
-															);
-														}, 0)
+														<>
+															مرحله: {stage} - {totalWeight} تن {materialName}
+														</>
 													);
-												}, 0)}{" "}
-												تن
+												})()}
 											</h4>
 										</div>
 										<div className="grid grid-cols-2 lg:grid-cols-3 gap-10 justify-items-center">
