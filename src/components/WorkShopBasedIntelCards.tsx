@@ -152,7 +152,7 @@ export default function WorkshopBasedIntelCards({
 												})()}
 											</h4>
 										</div>
-										<div className="grid grid-cols-2 lg:grid-cols-3 gap-10 justify-items-center">
+										<div className="grid grid-cols-2 xl:grid-cols-3 gap-10 justify-items-center">
 											{itemsForStage.map((item, subIdx) => {
 												const matchedSelected = selectedDays.find(
 													(d) => d.format("YYYY-MM-DD") === item.date
