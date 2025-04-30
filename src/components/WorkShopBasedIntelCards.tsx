@@ -45,7 +45,7 @@ export default function WorkshopBasedIntelCards({
 						className="bg-gray-300 shadow-lg p-4 rounded-xl h-full"
 					>
 						{/* @ts-ignore */}
-						<CardHeader className="bg-inherit shadow-none m-0 p-4 pb-0">
+						<CardHeader className="bg-inherit shadow-none m-0 p-4 pb-2">
 							<h3 className="flex flex-col gap-1.5 mb-2 ">
 								<span className="text-xl font-bold flex items-center gap-1">
 									<svg
@@ -95,7 +95,7 @@ export default function WorkshopBasedIntelCards({
 							</h3>
 						</CardHeader>
 						{/* @ts-ignore */}
-						<CardBody className="flex flex-col gap-10  pt-4 ">
+						<CardBody className="flex flex-col gap-10 p-4 pt-4 ">
 							{Object.entries(
 								group.itemsByStage.reduce(
 									(acc, item) => {
@@ -109,11 +109,41 @@ export default function WorkshopBasedIntelCards({
 								)
 							).map(([stage, itemsForStage]) => {
 								return (
-									<div key={stage} className="mb-6 border-t-2 border-gray-500">
-										<h4 className="text-lg font-bold text-blue-900 mb-4">
-											مرحله: {stage}
-										</h4>
-										<div className="grid grid-cols-3 gap-10 ">
+									<div key={stage} className="mb-6 ">
+										<div className="flex gap-1 items-center mb-4 border-b-2 border-blue-900">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												viewBox="0 0 24 24"
+												fill="currentColor"
+												className="size-5 text-blue-900"
+											>
+												<path
+													fillRule="evenodd"
+													d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
+													clipRule="evenodd"
+												/>
+											</svg>
+
+											<h4 className="text-lg font-bold text-blue-900 ">
+												مرحله: {stage} -{" "}
+												{itemsForStage.reduce((sum, item) => {
+													return (
+														sum +
+														item.resources.reduce((resSum, res) => {
+															return (
+																resSum +
+																Object.values(res).reduce(
+																	(valSum, val) => valSum + Number(val),
+																	0
+																)
+															);
+														}, 0)
+													);
+												}, 0)}{" "}
+												تن
+											</h4>
+										</div>
+										<div className="grid grid-cols-2 lg:grid-cols-3 gap-10 justify-items-center">
 											{itemsForStage.map((item, subIdx) => {
 												const matchedSelected = selectedDays.find(
 													(d) => d.format("YYYY-MM-DD") === item.date
@@ -130,7 +160,7 @@ export default function WorkshopBasedIntelCards({
 												return (
 													<div
 														key={subIdx}
-														className="flex flex-col gap-5 items-start pt-2 w-fit"
+														className="flex flex-col gap-5 items-center pt-2 w-fit"
 													>
 														{/* Date Card */}
 														<div className="inline-block mx-2 p-2 w-24 bg-white rounded-lg text-center !border-0 text-black shadow-md">
@@ -149,7 +179,7 @@ export default function WorkshopBasedIntelCards({
 														</div>
 
 														{/* Resource List */}
-														<ul className="grid grid-cols-1 gap-y-1 gap-x-8 list-disc pr-5 text-md flex-1">
+														<ul className="grid grid-cols-1 gap-y-1 gap-x-8  text-md flex-1">
 															{item.resources.map((res, i) => {
 																const [key, value] = Object.entries(res)[0];
 																return (

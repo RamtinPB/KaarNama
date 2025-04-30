@@ -210,7 +210,7 @@ export default function IntelCards({ selectedDays }: IntelCardsProps) {
 			})
 		);
 
-		console.log("grouped workshop by stage:", workshopGroupedArray);
+		//console.log("grouped workshop by stage:", workshopGroupedArray);
 		setGroupedData_WorkshopBased(workshopGroupedArray as any); // cast if needed
 
 		let total = 0;

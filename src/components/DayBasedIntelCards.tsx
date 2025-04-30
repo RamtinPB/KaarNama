@@ -47,7 +47,7 @@ export default function DayBasedIntelCards({
 						className="bg-gray-300 shadow-lg p-4 rounded-xl h-full"
 					>
 						{/* @ts-ignore */}
-						<CardBody className="flex flex-row justify-between gap-5">
+						<CardBody className="flex flex-row justify-between gap-5 p-3 md:p-6">
 							<div className="flex flex-col gap-12 ">
 								{group.items.map((item, subIdx) => (
 									<div key={subIdx}>
